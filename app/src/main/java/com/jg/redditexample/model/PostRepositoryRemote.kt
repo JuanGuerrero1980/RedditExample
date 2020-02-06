@@ -23,8 +23,7 @@ class PostRepositoryRemote: PostRepository {
             override fun onResponse(call: Call<PostsResponse>, response: Response<PostsResponse>) {
                 response?.body()?.let {
                     if(response.isSuccessful){
-                        Log.v(tag, "data ${it.data}")
-                        callback.onSuccess(it.data)
+                        callback.onSuccess(it.data.children)
                     }else{
                         callback.onError("not found")
                     }

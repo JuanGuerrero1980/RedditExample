@@ -2,6 +2,7 @@ package com.jg.redditexample.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
@@ -9,11 +10,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.jg.redditexample.R
+import com.jg.redditexample.data.Children
 import com.jg.redditexample.data.ResponseCallBack
+import com.jg.redditexample.model.Post
 
 import com.jg.redditexample.view.dummy.DummyContent
 import com.jg.redditexample.model.PostRepositoryRemote
+import com.jg.redditexample.viewmodel.PostViewModel
+import com.jg.redditexample.viewmodel.ViewModelFactory
 import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list_content.view.*
 import kotlinx.android.synthetic.main.item_list.*
@@ -33,6 +40,13 @@ class ItemListActivity : AppCompatActivity() {
      * device.
      */
     private var twoPane: Boolean = false
+
+    private lateinit var viewModel: PostViewModel
+    private lateinit var adapter: SimpleItemRecyclerViewAdapter
+
+    companion object {
+        const val TAG= "View"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,25 +68,40 @@ class ItemListActivity : AppCompatActivity() {
             twoPane = true
         }
 
+        setupViewModel()
         setupRecyclerView(item_list)
-        PostRepositoryRemote().retrieveTopPosts(object : ResponseCallBack{
-            override fun onSuccess(obj: Any?) {
-
-            }
-
-            override fun onError(obj: Any?) {
-
-            }
-
-        })
     }
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {
-        recyclerView.adapter = SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, twoPane)
+
+        adapter = SimpleItemRecyclerViewAdapter(this, viewModel.posts.value?: emptyList(), twoPane)
+        recyclerView.adapter = adapter
+    }
+
+
+    private fun setupViewModel(){
+        viewModel = ViewModelProviders.of(this, ViewModelFactory(repository = PostRepositoryRemote())).get(PostViewModel::class.java)
+        viewModel.posts.observe(this,renderPosts)
+
+        //viewModel.isViewLoading.observe(this,isViewLoadingObserver)
+        //viewModel.onMessageError.observe(this,onMessageErrorObserver)
+        //viewModel.isEmptyList.observe(this,emptyListObserver)
+    }
+
+    private val renderPosts = Observer<List<Children>> {
+        Log.v(TAG, "data updated $it")
+        //layoutError.visibility=View.GONE
+        //layoutEmpty.visibility=View.GONE
+        adapter.update(it)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadTopPosts()
     }
 
     class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity,
-                                        private val values: List<DummyContent.DummyItem>,
+                                        private var values: List<Children>,
                                         private val twoPane: Boolean) :
             RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
@@ -80,11 +109,11 @@ class ItemListActivity : AppCompatActivity() {
 
         init {
             onClickListener = View.OnClickListener { v ->
-                val item = v.tag as DummyContent.DummyItem
+                val item = v.tag as Children
                 if (twoPane) {
                     val fragment = ItemDetailFragment().apply {
                         arguments = Bundle().apply {
-                            putString(ItemDetailFragment.ARG_ITEM_ID, item.id)
+                            putString(ItemDetailFragment.ARG_ITEM_ID, item.data.title)
                         }
                     }
                     parentActivity.supportFragmentManager
@@ -93,7 +122,7 @@ class ItemListActivity : AppCompatActivity() {
                             .commit()
                 } else {
                     val intent = Intent(v.context, ItemDetailActivity::class.java).apply {
-                        putExtra(ItemDetailFragment.ARG_ITEM_ID, item.id)
+                        putExtra(ItemDetailFragment.ARG_ITEM_ID, item.data.title)
                     }
                     v.context.startActivity(intent)
                 }
@@ -108,8 +137,8 @@ class ItemListActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
-            holder.idView.text = item.id
-            holder.contentView.text = item.content
+            holder.idView.text = item.data.id
+            holder.contentView.text = item.data.title
 
             with(holder.itemView) {
                 tag = item
@@ -118,6 +147,11 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         override fun getItemCount() = values.size
+
+        fun update(data:List<Children>){
+            values = data
+            notifyDataSetChanged()
+        }
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val idView: TextView = view.id_text
