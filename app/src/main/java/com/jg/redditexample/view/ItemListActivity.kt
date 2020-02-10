@@ -12,12 +12,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.jg.redditexample.R
 import com.jg.redditexample.data.Children
-import com.jg.redditexample.data.ResponseCallBack
-import com.jg.redditexample.model.Post
+import com.jg.redditexample.data.Data
 
-import com.jg.redditexample.view.dummy.DummyContent
 import com.jg.redditexample.model.PostRepositoryRemote
 import com.jg.redditexample.viewmodel.PostViewModel
 import com.jg.redditexample.viewmodel.ViewModelFactory
@@ -43,6 +42,9 @@ class ItemListActivity : AppCompatActivity() {
 
     private lateinit var viewModel: PostViewModel
     private lateinit var adapter: SimpleItemRecyclerViewAdapter
+    private var isLastPage: Boolean = false
+    private var isLoading: Boolean = false
+    private var page: String? = ""
 
     companion object {
         const val TAG= "View"
@@ -61,10 +63,6 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         if (item_detail_container != null) {
-            // The detail container view will be present only in the
-            // large-screen layouts (res/values-w900dp).
-            // If this view is present, then the
-            // activity should be in two-pane mode.
             twoPane = true
         }
 
@@ -74,8 +72,24 @@ class ItemListActivity : AppCompatActivity() {
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {
 
-        adapter = SimpleItemRecyclerViewAdapter(this, viewModel.posts.value?: emptyList(), twoPane)
+        adapter = SimpleItemRecyclerViewAdapter(this, viewModel.posts.value?.children ?: mutableListOf(), twoPane)
         recyclerView.adapter = adapter
+        recyclerView.addOnScrollListener(object : PaginationScrollListener(recyclerView.layoutManager as LinearLayoutManager) {
+            override fun isLastPage(): Boolean {
+                return isLastPage
+            }
+
+            override fun isLoading(): Boolean {
+                return isLoading
+            }
+
+            override fun loadMoreItems() {
+                if(!page.isNullOrEmpty()) {
+                    isLoading = true
+                    viewModel.loadTopPosts(after = "", before = page!!)
+                }
+            }
+        })
     }
 
 
@@ -88,74 +102,18 @@ class ItemListActivity : AppCompatActivity() {
         //viewModel.isEmptyList.observe(this,emptyListObserver)
     }
 
-    private val renderPosts = Observer<List<Children>> {
+    private val renderPosts = Observer<Data> {
         Log.v(TAG, "data updated $it")
+        if(it == null) return@Observer
         //layoutError.visibility=View.GONE
         //layoutEmpty.visibility=View.GONE
-        adapter.update(it)
+        page = it.after
+        adapter.update(it.children)
     }
 
     override fun onResume() {
         super.onResume()
-        viewModel.loadTopPosts()
+        viewModel.loadTopPosts("", "")
     }
 
-    class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity,
-                                        private var values: List<Children>,
-                                        private val twoPane: Boolean) :
-            RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
-
-        private val onClickListener: View.OnClickListener
-
-        init {
-            onClickListener = View.OnClickListener { v ->
-                val item = v.tag as Children
-                if (twoPane) {
-                    val fragment = ItemDetailFragment().apply {
-                        arguments = Bundle().apply {
-                            putString(ItemDetailFragment.ARG_ITEM_ID, item.data.title)
-                        }
-                    }
-                    parentActivity.supportFragmentManager
-                            .beginTransaction()
-                            .replace(R.id.item_detail_container, fragment)
-                            .commit()
-                } else {
-                    val intent = Intent(v.context, ItemDetailActivity::class.java).apply {
-                        putExtra(ItemDetailFragment.ARG_ITEM_ID, item.data.title)
-                    }
-                    v.context.startActivity(intent)
-                }
-            }
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_list_content, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = values[position]
-            holder.idView.text = item.data.id
-            holder.contentView.text = item.data.title
-
-            with(holder.itemView) {
-                tag = item
-                setOnClickListener(onClickListener)
-            }
-        }
-
-        override fun getItemCount() = values.size
-
-        fun update(data:List<Children>){
-            values = data
-            notifyDataSetChanged()
-        }
-
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val idView: TextView = view.id_text
-            val contentView: TextView = view.content
-        }
-    }
 }
