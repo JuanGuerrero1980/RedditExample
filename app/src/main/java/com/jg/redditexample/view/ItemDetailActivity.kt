@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.MenuItem
 import com.jg.redditexample.R
 import kotlinx.android.synthetic.main.activity_item_detail.*
+import kotlin.time.ExperimentalTime
 
 /**
  * An activity representing a single Item detail screen. This
@@ -14,6 +15,7 @@ import kotlinx.android.synthetic.main.activity_item_detail.*
  * item details are presented side-by-side with a list of items
  * in a [ItemListActivity].
  */
+@ExperimentalTime
 class ItemDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

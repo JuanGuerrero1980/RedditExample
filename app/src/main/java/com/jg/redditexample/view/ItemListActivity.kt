@@ -24,6 +24,7 @@ import com.jg.redditexample.viewmodel.ViewModelFactory
 import kotlinx.android.synthetic.main.activity_item_list.*
 import kotlinx.android.synthetic.main.item_list_content.view.*
 import kotlinx.android.synthetic.main.item_list.*
+import kotlin.time.ExperimentalTime
 
 /**
  * An activity representing a list of Pings. This activity
@@ -33,6 +34,7 @@ import kotlinx.android.synthetic.main.item_list.*
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
+@ExperimentalTime
 class ItemListActivity : AppCompatActivity() {
 
     /**
@@ -57,11 +59,6 @@ class ItemListActivity : AppCompatActivity() {
 
         setSupportActionBar(toolbar)
         toolbar.title = title
-
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-        }
 
         if (item_detail_container != null) {
             twoPane = true

@@ -15,7 +15,15 @@ import com.jg.redditexample.R
 import com.jg.redditexample.data.Children
 import com.jg.redditexample.utils.loadImage
 import kotlinx.android.synthetic.main.item_list_content.view.*
-
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
+import kotlin.time.ExperimentalTime
+import kotlin.time.milliseconds
+@ExperimentalTime
 class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity,
                                     private var values: MutableList<Children>,
                                     private val twoPane: Boolean) :
@@ -31,8 +39,8 @@ class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity
         val item = values[position]
         holder.authorView.text = item.data.author
         holder.contentView.text = item.data.title
-        holder.commentsView.text = item.data.num_comments.toString()
-        holder.createdView.text = item.data.created.toString()
+        holder.commentsView.text = parentActivity.getString(R.string.comments, item.data.num_comments.toString())
+        holder.createdView.text = parentActivity.getString(R.string.hours_ago, calculateHours(item.data.created))
         holder.imageView.loadImage(item.data.thumbnail)
         holder.imageReadView.visibility = if (item.data.unreadStatus) View.VISIBLE else View.INVISIBLE
         with(holder.contentLayoutView) {
@@ -47,6 +55,11 @@ class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity
         notifyDataSetChanged()
     }
 
+
+    private fun calculateHours(time: Long): String{
+
+        return (System.currentTimeMillis() - time*1000).milliseconds.inHours.roundToInt().toString()
+    }
 
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

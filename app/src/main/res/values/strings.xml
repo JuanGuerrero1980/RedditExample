@@ -2,4 +2,6 @@
     <string name="app_name">RedditExample</string>
     <string name="title_item_detail">Item Detail</string>
     <string name="dismiss_post">Dismiss Post</string>
+    <string name="comments">%s comments</string>
+    <string name="hours_ago">%s hours ago</string>
 </resources>
