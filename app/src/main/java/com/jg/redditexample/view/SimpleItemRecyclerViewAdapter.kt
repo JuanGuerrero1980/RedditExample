@@ -21,31 +21,6 @@ class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity
                                     private val twoPane: Boolean) :
     RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
-    private val onClickListener: View.OnClickListener
-
-    init {
-        onClickListener = View.OnClickListener { v ->
-            val item = v.tag as Children
-            if (twoPane) {
-                val fragment = ItemDetailFragment().apply {
-                    arguments = Bundle().apply {
-                        putString(ItemDetailFragment.ARG_ITEM_ID, item.data.title)
-                    }
-                }
-                parentActivity.supportFragmentManager
-                    .beginTransaction()
-                    .replace(R.id.item_detail_container, fragment)
-                    .commit()
-            } else {
-                val intent = Intent(v.context, ItemDetailActivity::class.java).apply {
-                    putExtra(ItemDetailFragment.ARG_ITEM_ID, item.data.title)
-                }
-                v.context.startActivity(intent)
-            }
-        }
-
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_list_content, parent, false)
@@ -59,9 +34,9 @@ class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity
         holder.commentsView.text = item.data.num_comments.toString()
         holder.createdView.text = item.data.created.toString()
         holder.imageView.loadImage(item.data.thumbnail)
+        holder.imageReadView.visibility = if (item.data.unreadStatus) View.VISIBLE else View.INVISIBLE
         with(holder.contentLayoutView) {
             tag = item
-            setOnClickListener(onClickListener)
         }
     }
 
@@ -80,11 +55,37 @@ class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity
         val commentsView: TextView = view.comments
         val createdView: TextView = view.created
         val imageView: ImageView = view.imageViewThumb
-        val dismissView: TextView = view.dismiss
+        val imageReadView : ImageView = view.imageView
+        private val dismissView: TextView = view.dismiss
         val contentLayoutView: LinearLayout = view.contentLayout
 
         init {
             dismissView.setOnClickListener(remove())
+            contentLayoutView.setOnClickListener(open())
+        }
+
+        private fun open(): (View) -> Unit = {
+            layoutPosition.also { currentPosition ->
+                val item = it.tag as Children
+                item.data.unreadStatus = true
+                notifyItemChanged(currentPosition)
+                if (twoPane) {
+                    val fragment = ItemDetailFragment().apply {
+                        arguments = Bundle().apply {
+                            putString(ItemDetailFragment.ARG_ITEM_ID, item.data.title)
+                        }
+                    }
+                    parentActivity.supportFragmentManager
+                        .beginTransaction()
+                        .replace(R.id.item_detail_container, fragment)
+                        .commit()
+                } else {
+                    val intent = Intent(it.context, ItemDetailActivity::class.java).apply {
+                        putExtra(ItemDetailFragment.ARG_ITEM_ID, item.data.title)
+                    }
+                    it.context.startActivity(intent)
+                }
+            }
         }
 
         private fun remove(): (View) -> Unit = {

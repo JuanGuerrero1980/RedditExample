@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jg.redditexample.R
 import com.jg.redditexample.data.Children
@@ -74,6 +75,12 @@ class ItemListActivity : AppCompatActivity() {
 
         adapter = SimpleItemRecyclerViewAdapter(this, viewModel.posts.value?.children ?: mutableListOf(), twoPane)
         recyclerView.adapter = adapter
+            recyclerView.addItemDecoration(
+                DividerItemDecoration(
+                    this@ItemListActivity,
+                    LinearLayoutManager.VERTICAL
+                )
+            )
         recyclerView.addOnScrollListener(object : PaginationScrollListener(recyclerView.layoutManager as LinearLayoutManager) {
             override fun isLastPage(): Boolean {
                 return isLastPage
