@@ -2,13 +2,18 @@ package com.jg.redditexample.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.system.Os.remove
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide.init
 import com.jg.redditexample.R
 import com.jg.redditexample.data.Children
+import com.jg.redditexample.utils.loadImage
 import kotlinx.android.synthetic.main.item_list_content.view.*
 
 class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity,
@@ -38,6 +43,7 @@ class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity
                 v.context.startActivity(intent)
             }
         }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -48,10 +54,12 @@ class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = values[position]
-        holder.idView.text = item.data.id
+        holder.authorView.text = item.data.author
         holder.contentView.text = item.data.title
-
-        with(holder.itemView) {
+        holder.commentsView.text = item.data.num_comments.toString()
+        holder.createdView.text = item.data.created.toString()
+        holder.imageView.loadImage(item.data.thumbnail)
+        with(holder.contentLayoutView) {
             tag = item
             setOnClickListener(onClickListener)
         }
@@ -64,8 +72,26 @@ class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity
         notifyDataSetChanged()
     }
 
+
+
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val idView: TextView = view.id_text
-        val contentView: TextView = view.content
+        val contentView: TextView = view.title
+        val authorView: TextView = view.author
+        val commentsView: TextView = view.comments
+        val createdView: TextView = view.created
+        val imageView: ImageView = view.imageViewThumb
+        val dismissView: TextView = view.dismiss
+        val contentLayoutView: LinearLayout = view.contentLayout
+
+        init {
+            dismissView.setOnClickListener(remove())
+        }
+
+        private fun remove(): (View) -> Unit = {
+            layoutPosition.also { currentPosition ->
+                values.removeAt(currentPosition)
+                notifyItemRemoved(currentPosition)
+            }
+        }
     }
 }
