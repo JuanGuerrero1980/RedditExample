@@ -48,4 +48,8 @@ class PostViewModel(private val repository: PostRepositoryRemote): ViewModel() {
             }
         })
     }
+
+    fun clearPosts(){
+        _posts.value = null
+    }
 }

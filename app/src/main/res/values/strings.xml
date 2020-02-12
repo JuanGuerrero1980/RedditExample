@@ -5,4 +5,5 @@
     <string name="comments">%s comments</string>
     <string name="hours_ago">%s hours ago</string>
     <string name="content_description" />
+    <string name="clear_all">Clear all</string>
 </resources>

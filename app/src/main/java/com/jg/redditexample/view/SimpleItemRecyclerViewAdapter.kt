@@ -2,7 +2,6 @@ package com.jg.redditexample.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.system.Os.remove
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,19 +9,14 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide.init
 import com.jg.redditexample.R
 import com.jg.redditexample.data.Children
 import com.jg.redditexample.utils.loadImage
 import kotlinx.android.synthetic.main.item_list_content.view.*
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDate
-import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 import kotlin.time.ExperimentalTime
 import kotlin.time.milliseconds
+
 @ExperimentalTime
 class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity,
                                     private var values: MutableList<Children>,
@@ -55,6 +49,10 @@ class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity
         notifyDataSetChanged()
     }
 
+    fun clearAll(){
+        values.clear()
+        notifyDataSetChanged()
+    }
 
     private fun calculateHours(time: Long): String{
 
