@@ -85,7 +85,7 @@ class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity
                 if (twoPane) {
                     val fragment = ItemDetailFragment().apply {
                         arguments = Bundle().apply {
-                            putString(ItemDetailFragment.ARG_ITEM_ID, item.data.title)
+                            putSerializable(ItemDetailFragment.ARG_ITEM_ID, item.data)
                         }
                     }
                     parentActivity.supportFragmentManager
@@ -94,7 +94,7 @@ class SimpleItemRecyclerViewAdapter(private val parentActivity: ItemListActivity
                         .commit()
                 } else {
                     val intent = Intent(it.context, ItemDetailActivity::class.java).apply {
-                        putExtra(ItemDetailFragment.ARG_ITEM_ID, item.data.title)
+                        putExtra(ItemDetailFragment.ARG_ITEM_ID, item.data)
                     }
                     it.context.startActivity(intent)
                 }

@@ -26,21 +26,9 @@ import kotlinx.android.synthetic.main.item_list_content.view.*
 import kotlinx.android.synthetic.main.item_list.*
 import kotlin.time.ExperimentalTime
 
-/**
- * An activity representing a list of Pings. This activity
- * has different presentations for handset and tablet-size devices. On
- * handsets, the activity presents a list of items, which when touched,
- * lead to a [ItemDetailActivity] representing
- * item details. On tablets, the activity presents the list of items and
- * item details side-by-side using two vertical panes.
- */
 @ExperimentalTime
 class ItemListActivity : AppCompatActivity() {
 
-    /**
-     * Whether or not the activity is in two-pane mode, i.e. running on a tablet
-     * device.
-     */
     private var twoPane: Boolean = false
 
     private lateinit var viewModel: PostViewModel
@@ -113,11 +101,6 @@ class ItemListActivity : AppCompatActivity() {
         //layoutEmpty.visibility=View.GONE
         page = it.after
         adapter.update(it.children)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.loadTopPosts("", "")
     }
 
 }

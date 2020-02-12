@@ -4,4 +4,5 @@
     <string name="dismiss_post">Dismiss Post</string>
     <string name="comments">%s comments</string>
     <string name="hours_ago">%s hours ago</string>
+    <string name="content_description" />
 </resources>

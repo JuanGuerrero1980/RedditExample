@@ -23,7 +23,7 @@ class PostViewModel(private val repository: PostRepositoryRemote): ViewModel() {
 
 
     init {
-        //loadTopPosts()
+        loadTopPosts("", "")
     }
 
     fun loadTopPosts(after: String, before: String){
