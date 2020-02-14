@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -71,8 +72,7 @@ class ItemListActivity : AppCompatActivity() {
 
             override fun loadMoreItems() {
                 if(!page.isNullOrEmpty()) {
-                    isLoading = true
-                    viewModel.loadTopPosts(after = "", before = page!!)
+                    viewModel.loadTopPosts(after = page!!, before = "")
                 }
             }
         })
@@ -83,9 +83,19 @@ class ItemListActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this, ViewModelFactory(repository = PostRepositoryRemote())).get(PostViewModel::class.java)
         viewModel.posts.observe(this,renderPosts)
 
-        //viewModel.isViewLoading.observe(this,isViewLoadingObserver)
+
+        viewModel.isViewLoading.observe(this,isViewLoadingObserver)
         //viewModel.onMessageError.observe(this,onMessageErrorObserver)
         //viewModel.isEmptyList.observe(this,emptyListObserver)
+    }
+
+    private val isViewLoadingObserver = Observer<Boolean> {
+        isLoading = it
+        if(it){
+            progressBar.visibility= View.VISIBLE
+        }else{
+            progressBar.visibility=View.GONE
+        }
     }
 
     private val renderPosts = Observer<Data> {
